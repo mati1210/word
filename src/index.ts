@@ -5,37 +5,44 @@ function getRndInteger(min: number, max: number) {
 }
 
 type RGB = [number, number, number];
-export function randomColor(): RGB {
+function randomColor(): RGB {
     return [getRndInteger(0, 256), getRndInteger(0, 256), getRndInteger(0, 256)]
 }
 
 class Word {
-    public word: RGB[];
     version: number;
+    public words: RGB[];
+    word: string;
     paragraph: HTMLElement;
     button: HTMLElement;
 
     constructor() {
         let paragraph = document.getElementById("p");
         let button = document.getElementById("button");
-        if (!paragraph) {
-            throw new Error("p not present!");
-        }
-        if (!button) {
-            throw new Error("word not present!");
-        }
+        let word = document.querySelector('meta[name="word"]');
+        if (!paragraph || !button || !word)
+            throw new Error("some html is missing!");
+
+        button.onclick = () => { this.add(randomColor()) }
         this.version = WORD_VERSION;
+        this.words = [];
+        this.word = word instanceof HTMLMetaElement ? word.content : "";
         this.paragraph = paragraph;
         this.button = button;
-        this.word = new Array();
     }
 
     length(): number {
-        return this.word.length
+        return this.words.length
+    }
+
+    clear() {
+        this.paragraph.innerHTML = "";
+        this.button.innerHTML = "click here! (clicked 0 times)"
+        this.words = [];
     }
 
     draw() {
-        for (let word of this.word) {
+        for (let word of this.words) {
             this.drawOne(word)
         }
     }
@@ -46,14 +53,14 @@ class Word {
     }
 
     add(rgb: RGB) {
-        this.word.push(rgb);
+        this.words.push(rgb);
         this.drawOne(rgb)
         this.save()
     }
 
     save() {
         localStorage.setItem("word", JSON.stringify({
-            word: this.word,
+            word: this.words,
             version: this.version
         }))
     }
@@ -65,13 +72,12 @@ class Word {
         let json: { word: RGB[], version: number } = JSON.parse(data);
         if (json["version"] < WORD_VERSION) { return word; }
 
-        word.word = json["word"]
+        word.words = json["word"]
         word.draw();
         return word;
     }
 }
 
-window.addEventListener('load', () => {
-    var word = Word.load();
-    document.getElementById("button")!.onclick = () => { word.add(randomColor()) };
+window.addEventListener('DOMContentLoaded', () => {
+    Word.load();
 });
