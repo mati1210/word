@@ -1,4 +1,3 @@
-const WORD_VERSION = 3;
 function dbg<T>(t: T): T {
     console.log(t);
     return t
@@ -6,16 +5,17 @@ function dbg<T>(t: T): T {
 
 type ColorHex = string;
 namespace Saving {
-    export type RGB = [number, number, number]; // legacy
+    type RGB = [number, number, number]; // legacy
+    export const SAVE_VERSION = 3;
     export type CurrentSave = SaveV3;
     export type Save = SaveV2 | SaveV3;
 
-    export interface SaveV2 {
+    interface SaveV2 {
         word: RGB[],
         version: 2
     }
 
-    export interface SaveV3 {
+    interface SaveV3 {
         colors: ColorHex[],
         version: 3
     }
@@ -48,8 +48,6 @@ namespace Saving {
         }
     }
 }
-import Save = Saving.convertSave
-
 
 function getRndInt(min: number, max: number) {
     return Math.floor(Math.random() * (max - min)) + min;
@@ -60,6 +58,11 @@ function getElem(id: string): HTMLElement {
     if (!elem)
         throw new Error(`${id} missing!`)
     return elem
+}
+
+const params = new URLSearchParams(window.location.search)
+function getQuery(query: string): string | null {
+    return params.get(query);
 }
 
 function randomColor(): ColorHex {
@@ -78,10 +81,10 @@ class Game {
     clearb: HTMLElement;
 
     constructor() {
-        let word = getElem("word");
+        let word = getQuery("word");
 
         this.colors = [];
-        this.word = word instanceof HTMLMetaElement ? word.content : "word";
+        this.word = word ? word : "word";
         this.paragraph = getElem("p")
 
         this.clicker = getElem("clicker");
@@ -120,7 +123,7 @@ class Game {
     save() {
         localStorage.setItem("word", JSON.stringify({
             colors: this.colors,
-            version: WORD_VERSION
+            version: Saving.SAVE_VERSION
         }))
     }
 
@@ -128,7 +131,7 @@ class Game {
         let word = new Game();
         let data = localStorage.getItem("word");
         if (!data) { return word; }
-        let save = dbg(Saving.convertSave(data));
+        let save = Saving.convertSave(data);
         if (!save || !(save.colors instanceof Array)) { return word; }
 
         word.colors = save.colors;
