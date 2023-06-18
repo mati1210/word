@@ -3,10 +3,6 @@ const DEFAULT_WORD = "word";
 type RGB = [r: number, g: number, b: number]; // legacy
 type ColorHex = string;
 
-function getRndInt(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min)) + min;
-}
-
 function getElem(id: string): HTMLElement {
   let elem = document.getElementById(id);
   if (!elem) throw new Error(`${id} missing!`);
@@ -24,7 +20,8 @@ function rgbToHex(rgb: RGB): ColorHex {
   return `${r}${g}${b}`;
 }
 function randomColor(): ColorHex {
-  return rgbToHex([getRndInt(0, 256), getRndInt(0, 256), getRndInt(0, 256)]);
+  let num = Math.floor(Math.random() * 16777216);
+  return num.toString(16).padStart(6, "0")
 }
 
 namespace Saving {
