@@ -1,7 +1,4 @@
-// created on 2022-12-30; updated on 2023-06-18
 const DEFAULT_WORD = "word";
-type RGB = [r: number, g: number, b: number]; // legacy
-type ColorHex = string;
 
 function getElem(id: string): HTMLElement {
   let elem = document.getElementById(id);
@@ -13,74 +10,10 @@ const params = new URLSearchParams(window.location.search);
 function getQuery(query: string): string | null {
   return params.get(query);
 }
-function rgbToHex(rgb: RGB): ColorHex {
-  let r = rgb[0].toString(16).padStart(2, "0");
-  let g = rgb[1].toString(16).padStart(2, "0");
-  let b = rgb[2].toString(16).padStart(2, "0");
-  return `${r}${g}${b}`;
-}
-function randomColor(): ColorHex {
-  let num = Math.floor(Math.random() * 16777216);
-  return num.toString(16).padStart(6, "0")
-}
-
-namespace Saving {
-  export type CurrentSave = SaveV4;
-  export type Save = SaveV2 | SaveV3 | SaveV4;
-
-  interface SaveV2 {
-    word: RGB[];
-    version: 2;
-  }
-
-  interface SaveV3 {
-    colors: ColorHex[];
-    version: 3;
-  }
-
-  interface SaveV4 {
-    word: string;
-    colors: ColorHex[];
-    version: 4;
-  }
-
-  function v2to3(save: SaveV2): SaveV3 {
-    let colors: ColorHex[] = [];
-    for (const rgb of save.word) {
-      colors.push(rgbToHex(rgb));
-    }
-
-    return { colors, version: 3 };
-  }
-
-  function v3to4(save: SaveV3): SaveV4 {
-    return {
-      word: DEFAULT_WORD,
-      colors: save.colors,
-      version: 4,
-    };
-  }
-
-  export function convertSave(save: string | Save): CurrentSave | null {
-    let s: Save = typeof save === "string" ? JSON.parse(save) : save;
-
-    if (typeof s["version"] !== "number") return null;
-    switch (s["version"]) {
-      case 2:
-        return convertSave(v2to3(s));
-      case 3:
-        return convertSave(v3to4(s));
-      case 4:
-        return s;
-      default:
-        return null;
-    }
-  }
-}
 
 class Game {
   word: string;
-  colors: ColorHex[];
+  colors: Color.HEX[];
   paragraph: HTMLElement;
 
   //TODO: make all these its own class
@@ -101,7 +34,7 @@ class Game {
     }
 
     this.clicker = getElem("click!");
-    this.clicker.onclick = () => this.add(randomColor());
+    this.clicker.onclick = () => this.add(Color.random());
     this.resetb = getElem("reset!");
     this.resetb.onclick = () => this.reset();
     this.editb = getElem("edit!");
@@ -170,12 +103,12 @@ class Game {
     }
   }
 
-  drawOne(color: ColorHex) {
+  drawOne(color: Color.HEX) {
     this.paragraph.innerHTML += `<span style="color:#${color}">${this.word}</span>`;
     this.clicker.innerHTML = `click here! (clicked ${this.length} times)`;
   }
 
-  add(color: ColorHex) {
+  add(color: Color.HEX) {
     this.showExtraButtons(true);
     this.colors.push(color);
     this.drawOne(color);
