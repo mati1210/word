@@ -130,8 +130,10 @@ class Game {
     );
   }
 
-  unhideExtraButtons() {
-    getElem("hider").innerHTML = ""; //TODO: make it rehideable
+  showExtraButtons(show: boolean) {
+    let style = getElem("hider");
+    if (show) style.innerText = "";
+    else style.innerText = ".hidden{display:none}";
   }
 
   editWordPrompt() {
@@ -148,6 +150,7 @@ class Game {
   }
 
   clearScreen() {
+    this.showExtraButtons(false);
     this.paragraph.innerHTML = "";
     this.clicker.innerHTML = "click here!";
   }
@@ -161,7 +164,7 @@ class Game {
 
   draw() {
     this.clearScreen();
-    if (this.length > 0) this.unhideExtraButtons();
+    if (this.length > 0) this.showExtraButtons(true);
     for (const word of this.colors) {
       this.drawOne(word);
     }
@@ -173,7 +176,7 @@ class Game {
   }
 
   add(color: ColorHex) {
-    this.unhideExtraButtons();
+    this.showExtraButtons(true);
     this.colors.push(color);
     this.drawOne(color);
     this.save();
