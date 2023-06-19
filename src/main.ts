@@ -12,7 +12,7 @@ function getQuery(query: string): string | null {
 }
 
 class Game {
-  word: string;
+  _word: string; // for getter/setter
   colors: Color.HEX[];
   paragraph: HTMLElement;
 
@@ -23,7 +23,7 @@ class Game {
 
   constructor() {
     this.colors = [];
-    this.word = DEFAULT_WORD;
+    this._word = DEFAULT_WORD;
     this.paragraph = getElem("p");
 
     let word = getQuery("word");
@@ -50,6 +50,16 @@ class Game {
     else this.save();
 
     this.draw();
+  }
+
+  get word(): string {
+    return this._word;
+  }
+
+  set word(word: string) {
+    this._word = word;
+    let endsWithS = word.slice(-1) === "s";
+    document.title = `${word}${endsWithS ? "" : "s"}!`;
   }
 
   save() {
