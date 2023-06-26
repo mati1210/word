@@ -19,12 +19,7 @@ namespace Saving {
   }
 
   function v2to3(save: SaveV2): SaveV3 {
-    let colors: Color.HEX[] = [];
-    for (const rgb of save.word) {
-      colors.push(Color.rgbToHex(rgb));
-    }
-
-    return { colors, version: 3 };
+    return { colors: save.word.map(Color.rgbToHex), version: 3 };
   }
 
   function v3to4(save: SaveV3): SaveV4 {
